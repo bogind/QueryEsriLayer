@@ -33,7 +33,7 @@ function chooseDownload(layerMetadata,url){
             }else{
                 gj = JSON.parse(xhttp.responseText)
             }
-            L.geoJson(gj,{
+            gjLayer = L.geoJson(gj,{
                 onEachFeature: function onEachFeature(feature, layer) {
                     if (feature.properties){
                     popupContent = "<table style='width:100%'>"
@@ -52,6 +52,7 @@ function chooseDownload(layerMetadata,url){
                 }
             })
             .addTo(map)
+            map.flyToBounds(gjLayer.getBounds())
             //return JSON.parse(xhttp.responseText);
         }
     };
