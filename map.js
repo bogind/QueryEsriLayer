@@ -88,7 +88,7 @@ L.control.openInput = function(opts) {
 let openInputButton =  L.control.openInput({ position: 'topleft' }).addTo(map);
 
 
-var inputLayer = getUrlParam('layer','')
+var inputLayer = getUrlVar()
 if(inputLayer.length > 0){
 	lastPart = inputLayer.slice(inputLayer.lastIndexOf("/")+1)
 			if(!Number.isNaN(parseInt(lastPart)) && Number.isInteger(parseInt(lastPart))){

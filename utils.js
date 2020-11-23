@@ -60,18 +60,10 @@ function chooseDownload(layerMetadata,url){
     xhttp.send();
 
 }
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
+function getUrlVar() {
+    var queryString = window.location.search;
+    var urlParams = new URLSearchParams(queryString);
+    var layer = urlParams.get('layer')
+    return layer;
 }
 
-function getUrlParam(parameter, defaultvalue){
-    var urlparameter = defaultvalue;
-    if(window.location.href.indexOf(parameter) > -1){
-        urlparameter = getUrlVars()[parameter];
-        }
-    return urlparameter;
-}
