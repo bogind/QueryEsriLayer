@@ -36,9 +36,6 @@ L.Control.Menu =  L.Control.extend({
 						layerMetadata =>
 						chooseDownload(layerMetadata,url)
 					)
-					.then(
-
-					)
 					
 			}
 			
@@ -89,3 +86,21 @@ L.control.openInput = function(opts) {
 }
 
 let openInputButton =  L.control.openInput({ position: 'topleft' }).addTo(map);
+
+
+var inputLayer = getUrlParam('layer','')
+if(inputLayer.length > 0){
+	lastPart = inputLayer.slice(inputLayer.lastIndexOf("/")+1)
+			if(!Number.isNaN(parseInt(lastPart)) && Number.isInteger(parseInt(lastPart))){
+				getLayerDetails(inputLayer+"?f=json")
+					.then(data =>
+						layerMetadata = data
+						)
+					.then(
+						layerMetadata =>
+						chooseDownload(layerMetadata,inputLayer)
+					)
+					
+			}
+}
+
