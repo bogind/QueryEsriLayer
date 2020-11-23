@@ -1,0 +1,30 @@
+.button{
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    line-height: 30px;
+    font-size: 28px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    display: block;
+    text-align: center;
+    cursor: pointer;
+}
+.menu {
+    height: 60px;
+    width: 30vw;
+    background-color: white;
+}
+.url-input {
+    width: 80%;
+    top: 30%;
+    position: absolute;
+    left: 2px;
+}
+.load-button {
+    width: 15%;
+    top: 30%;
+    float: right;
+    right: 2%;
+    position: relative;
+}
