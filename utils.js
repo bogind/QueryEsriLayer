@@ -34,57 +34,98 @@ function chooseDownload(layerMetadata,url){
                 gj = JSON.parse(xhttp.responseText)
             }
             if(layerMetadata.geometryType == "esriGeometryPoint"){
-                console.log(1)
                 if(layerMetadata.drawingInfo.renderer.type == "uniqueValue"){
-                    console.log(2)
-                    if(layerMetadata.drawingInfo.renderer.uniqueValueInfos[0].symbol.contentType == "image/png" &&
-                    "imageData" in layerMetadata.drawingInfo.renderer.uniqueValueInfos[0].symbol){
-                        console.log(3)
                         symbolField = layerMetadata.drawingInfo.renderer.field1
                         gjLayer = L.layerGroup()
                         for(var j=0;j<layerMetadata.drawingInfo.renderer.uniqueValueInfos.length;j++){
-                            layer = L.geoJson(gj,{
-                                pointToLayer: function(geoJsonPoint, latlng) {
-                                    return L.marker(latlng,{
-                                        icon: L.icon({
-                                            iconUrl: `${url}/images/${layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.url}`,
-                                        
-                                            iconSize:     [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height], // size of the icon
-                                            iconAnchor:   [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width/2, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height-1], // point of the icon which will correspond to marker's location
-                                            popupAnchor:  [-3, -layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height] // point from which the popup should open relative to the iconAnchor
-                                        })
-                                    });
-                                },
-                                onEachFeature: function onEachFeature(feature, layer) {
-                                    if (feature.properties){
-                                    popupContent = "<table style='width:100%'>"
-                                    for(var i=0;i<fields.length;i++){
-                                        field = fields[i]
-                                        if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
-                                            if(field.alias){
-                                                popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                            if(layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.type == "esriPMS"){
+                                layer = L.geoJson(gj,{
+                                    pointToLayer: function(geoJsonPoint, latlng) {
+                                        return L.marker(latlng,{
+                                            icon: L.icon({
+                                                iconUrl: `${url}/images/${layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.url}`,
+                                            
+                                                iconSize:     [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height], // size of the icon
+                                                iconAnchor:   [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width/2, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height-1], // point of the icon which will correspond to marker's location
+                                                popupAnchor:  [-3, -layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height] // point from which the popup should open relative to the iconAnchor
+                                            })
+                                        });
+                                    },
+                                    onEachFeature: function onEachFeature(feature, layer) {
+                                        if (feature.properties){
+                                        popupContent = "<table style='width:100%'>"
+                                        for(var i=0;i<fields.length;i++){
+                                            field = fields[i]
+                                            if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                                if(field.alias){
+                                                    popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                                }
                                             }
                                         }
+                                        popupContent += "</table>"
+                                        
+                                        layer.bindPopup(popupContent);
+                                        }
+                                    },
+                                    filter : function(feature){
+                                        if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
+                                            return true
+                                        }
                                     }
-                                    popupContent += "</table>"
-                                    
-                                    layer.bindPopup(popupContent);
-                                    }
-                                },
-                                filter : function(feature){
-                                    if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
-                                        return true
-                                    }
+                                })
+                            }else if(layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.type == "esriSMS"){
+                                if(layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.style ==  "esriSMSCircle"){
+                                    r = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.color[0]
+                                    g = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.color[1]
+                                    b = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.color[2]
+                                    a = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.color[3]/255
+                                    sr = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.outline.color[0]
+                                    sg = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.outline.color[1]
+                                    sb = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.outline.color[2]
+                                    sa = layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.outline.color[3]/255
+                                    layer = L.geoJson(gj,{
+                                        pointToLayer: function(geoJsonPoint, latlng) {
+                                            return L.circleMarker(latlng,{
+                                                radius: layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.size,
+                                                fillColor: rgbToHex(r,g,b),
+                                                color: rgbToHex(sr,sg,sb),
+                                                weight: layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.outline.width,
+                                                opacity: sa,
+                                                fillOpacity: a
+                                            });
+                                        },
+                                        onEachFeature: function onEachFeature(feature, layer) {
+                                            if (feature.properties){
+                                            popupContent = "<table style='width:100%'>"
+                                            for(var i=0;i<fields.length;i++){
+                                                field = fields[i]
+                                                if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                                    if(field.alias){
+                                                        popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                                    }
+                                                }
+                                            }
+                                            popupContent += "</table>"
+                                            
+                                            layer.bindPopup(popupContent);
+                                            }
+                                        },
+                                        filter : function(feature){
+                                            if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
+                                                return true
+                                            }
+                                        }
+                                    })
                                 }
-                            })
+                                
+                            }
+                            
                             gjLayer.addLayer(layer)
                         }
                         gjLayer.addTo(map)
                         map.flyToBounds(gjLayer.getBounds())
                     }
                     
-        
-                }
             }else{
                 gjLayer = L.geoJson(gj,{
                     onEachFeature: function onEachFeature(feature, layer) {
@@ -123,9 +164,10 @@ function getUrlVar() {
     var layer = urlParams.get('layer')
     return layer;
 }
-function buildIcons(layerMetadata, feature){
-    
-}
+const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
+    const hex = x.toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+  }).join('')
 
 /*
 symbology by geometry type:
