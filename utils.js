@@ -116,13 +116,82 @@ function chooseDownload(layerMetadata,url){
                                             }
                                         }
                                     })
+                                }else{
+                                    layer = L.geoJson(gj,{
+                                        onEachFeature: function onEachFeature(feature, layer) {
+                                            if (feature.properties){
+                                            popupContent = "<table style='width:100%'>"
+                                            for(var i=0;i<fields.length;i++){
+                                                field = fields[i]
+                                                if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                                    if(field.alias){
+                                                        popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                                    }
+                                                }
+                                            }
+                                            popupContent += "</table>"
+                                            
+                                            layer.bindPopup(popupContent);
+                                            }
+                                        },
+                                        filter : function(feature){
+                                            if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
+                                                return true
+                                            }
+                                        }
+                                    })
                                 }
                                 
+                            }else{
+                                layer = L.geoJson(gj,{
+                                    onEachFeature: function onEachFeature(feature, layer) {
+                                        if (feature.properties){
+                                        popupContent = "<table style='width:100%'>"
+                                        for(var i=0;i<fields.length;i++){
+                                            field = fields[i]
+                                            if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                                if(field.alias){
+                                                    popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                                }
+                                            }
+                                        }
+                                        popupContent += "</table>"
+                                        
+                                        layer.bindPopup(popupContent);
+                                        }
+                                    },
+                                    filter : function(feature){
+                                        if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
+                                            return true
+                                        }
+                                    }
+                                })
                             }
                             
                             gjLayer.addLayer(layer)
                         }
                         gjLayer.addTo(map)
+                        map.flyToBounds(gjLayer.getBounds())
+                    }else{
+                        gjLayer = L.geoJson(gj,{
+                            onEachFeature: function onEachFeature(feature, layer) {
+                                if (feature.properties){
+                                popupContent = "<table style='width:100%'>"
+                                for(var i=0;i<fields.length;i++){
+                                    field = fields[i]
+                                    if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                        if(field.alias){
+                                            popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                        }
+                                    }
+                                }
+                                popupContent += "</table>"
+                                
+                                layer.bindPopup(popupContent);
+                                }
+                            }
+                        })
+                        .addTo(map)
                         map.flyToBounds(gjLayer.getBounds())
                     }
                     
@@ -172,15 +241,12 @@ const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
 /*
 symbology by geometry type:
 
+https://developers.arcgis.com/web-map-specification/objects/symbol/
+
 //################
 // points
 //################
 
-https://stackoverflow.com/questions/21227078/convert-base64-to-image-in-javascript-jquery
-use that to create custom markers if:
-1. layerMetadata.drawingInfo.type == "uniqueValue"
-2. layerMetadata.drawingInfo.uniqueValueInfos[n].symbol.contentType == "image/png"
-3. layerMetadata.drawingInfo.uniqueValueInfos[n].symbol.contains("imageData")
 
 Possible to add legend?
 
