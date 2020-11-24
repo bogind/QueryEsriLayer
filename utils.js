@@ -33,26 +33,83 @@ function chooseDownload(layerMetadata,url){
             }else{
                 gj = JSON.parse(xhttp.responseText)
             }
-            gjLayer = L.geoJson(gj,{
-                onEachFeature: function onEachFeature(feature, layer) {
-                    if (feature.properties){
-                    popupContent = "<table style='width:100%'>"
-                    for(var i=0;i<fields.length;i++){
-                        field = fields[i]
-                        if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
-                            if(field.alias){
-                                popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+            if(layerMetadata.geometryType == "esriGeometryPoint"){
+                console.log(1)
+                if(layerMetadata.drawingInfo.renderer.type == "uniqueValue"){
+                    console.log(2)
+                    if(layerMetadata.drawingInfo.renderer.uniqueValueInfos[0].symbol.contentType == "image/png" &&
+                    "imageData" in layerMetadata.drawingInfo.renderer.uniqueValueInfos[0].symbol){
+                        console.log(3)
+                        symbolField = layerMetadata.drawingInfo.renderer.field1
+                        gjLayer = L.layerGroup()
+                        for(var j=0;j<layerMetadata.drawingInfo.renderer.uniqueValueInfos.length;j++){
+                            layer = L.geoJson(gj,{
+                                pointToLayer: function(geoJsonPoint, latlng) {
+                                    return L.marker(latlng,{
+                                        icon: L.icon({
+                                            iconUrl: `${url}/images/${layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.url}`,
+                                        
+                                            iconSize:     [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height], // size of the icon
+                                            iconAnchor:   [layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.width/2, layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height-1], // point of the icon which will correspond to marker's location
+                                            popupAnchor:  [-3, -layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].symbol.height] // point from which the popup should open relative to the iconAnchor
+                                        })
+                                    });
+                                },
+                                onEachFeature: function onEachFeature(feature, layer) {
+                                    if (feature.properties){
+                                    popupContent = "<table style='width:100%'>"
+                                    for(var i=0;i<fields.length;i++){
+                                        field = fields[i]
+                                        if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                            if(field.alias){
+                                                popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                            }
+                                        }
+                                    }
+                                    popupContent += "</table>"
+                                    
+                                    layer.bindPopup(popupContent);
+                                    }
+                                },
+                                filter : function(feature){
+                                    if(feature.properties[symbolField] == layerMetadata.drawingInfo.renderer.uniqueValueInfos[j].value){
+                                        return true
+                                    }
+                                }
+                            })
+                            gjLayer.addLayer(layer)
+                        }
+                        gjLayer.addTo(map)
+                        map.flyToBounds(gjLayer.getBounds())
+                    }
+                    
+        
+                }
+            }else{
+                gjLayer = L.geoJson(gj,{
+                    onEachFeature: function onEachFeature(feature, layer) {
+                        if (feature.properties){
+                        popupContent = "<table style='width:100%'>"
+                        for(var i=0;i<fields.length;i++){
+                            field = fields[i]
+                            if(field.type != "esriFieldTypeOID" && field.type != "esriFieldTypeGeometry" ){
+                                if(field.alias){
+                                    popupContent += `<tr><td><b>${field.alias}</b></td><td>${feature.properties[field.name]}</td></tr>`
+                                }
                             }
                         }
+                        popupContent += "</table>"
+                        
+                        layer.bindPopup(popupContent);
+                        }
                     }
-                    popupContent += "</table>"
-                    
-                    layer.bindPopup(popupContent);
-                    }
-                }
-            })
-            .addTo(map)
-            map.flyToBounds(gjLayer.getBounds())
+                })
+                .addTo(map)
+                map.flyToBounds(gjLayer.getBounds())
+
+            }
+            
+            
             //return JSON.parse(xhttp.responseText);
         }
     };
@@ -66,4 +123,30 @@ function getUrlVar() {
     var layer = urlParams.get('layer')
     return layer;
 }
+function buildIcons(layerMetadata, feature){
+    
+}
 
+/*
+symbology by geometry type:
+
+//################
+// points
+//################
+
+https://stackoverflow.com/questions/21227078/convert-base64-to-image-in-javascript-jquery
+use that to create custom markers if:
+1. layerMetadata.drawingInfo.type == "uniqueValue"
+2. layerMetadata.drawingInfo.uniqueValueInfos[n].symbol.contentType == "image/png"
+3. layerMetadata.drawingInfo.uniqueValueInfos[n].symbol.contains("imageData")
+
+Possible to add legend?
+
+if layerMetadata.drawingInfo.renderer.type == "simple"
+and layerMetadata.drawingInfo.renderer.symbol.type == "esriSMS" && layerMetadata.drawingInfo.renderer.symbol.style == "esriSMSCircle"
+use layerMetadata.drawingInfo.renderer.symbol.color (rgba) and layerMetadata.drawingInfo.renderer.symbol.size
+
+//################
+// lines
+//################
+*/
