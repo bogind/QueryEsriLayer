@@ -12,3 +12,13 @@ insert the layer URL for example <i style="background-color:gray;color: white;">
 * Load an arcgis online\arcgis server individual layer (if available as esri JSON or GeoJSON)
 * View the features data in popup
 * Use the **layer** url parameter to share a specific layer
+
+
+#### Symbology Support
+
+* points
+    * unique values
+        * Picture Marker Symbol (esriPMS)
+        * Simple Marker Symbol (esriSMS) (only circles)
+* polylines - not supported (leaflet default)
+* polygons - not supported (leaflet default)
