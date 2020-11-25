@@ -33,6 +33,8 @@ function chooseDownload(layerMetadata,url){
             }else{
                 gj = JSON.parse(xhttp.responseText)
             }
+            turfBounds = turf.bbox(gj)
+            bounds = [[turfBounds[1],turfBounds[0]],[turfBounds[3],turfBounds[2]]]
             if(layerMetadata.geometryType == "esriGeometryPoint"){
                 if(layerMetadata.drawingInfo.renderer.type == "uniqueValue"){
                         symbolField = layerMetadata.drawingInfo.renderer.field1
@@ -171,7 +173,7 @@ function chooseDownload(layerMetadata,url){
                             gjLayer.addLayer(layer)
                         }
                         gjLayer.addTo(map)
-                        map.flyToBounds(gjLayer.getBounds())
+                        map.fitBounds(bounds)
                     }else{
                         gjLayer = L.geoJson(gj,{
                             onEachFeature: function onEachFeature(feature, layer) {
@@ -192,7 +194,7 @@ function chooseDownload(layerMetadata,url){
                             }
                         })
                         .addTo(map)
-                        map.flyToBounds(gjLayer.getBounds())
+                        map.fitBounds(bounds)
                     }
                     
             }else{
@@ -215,7 +217,7 @@ function chooseDownload(layerMetadata,url){
                     }
                 })
                 .addTo(map)
-                map.flyToBounds(gjLayer.getBounds())
+                map.fitBounds(bounds)
 
             }
             
