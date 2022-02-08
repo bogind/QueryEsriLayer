@@ -5,6 +5,7 @@ async function getLayerDetails(url){
 }
 let a2g = ArcgisToGeojsonUtils;
 function chooseDownload(layerMetadata,url){
+    getAllIDs(url)
     formats = layerMetadata.supportedQueryFormats.split(", ")
     fields = layerMetadata.fields
     for(var i=0;i<fields.length;i++){
@@ -228,6 +229,15 @@ function chooseDownload(layerMetadata,url){
     xhttp.open("GET", queryUrl, true);
     xhttp.send();
 
+}
+function getAllIDs(url){
+    idsUrl = url + '/query?f=json&where=1%3D1&returnGeometry=false&returnIdsOnly=true'
+    fetch(idsUrl)
+    .then(res => res.json())
+    .then(data => {
+        console.log(data.objectIds.length)
+        console.log(data.objectIds)
+    })
 }
 function getUrlVar() {
     var queryString = window.location.search;
